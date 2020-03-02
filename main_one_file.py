@@ -2,10 +2,11 @@
 from random import seed
 from random import random
 from random import randint
-import numpy as np
+from random import gauss
 import math
 import matplotlib.pyplot as plt
 
+seed(100)
 
 world_sz_x, world_sz_y = 100.0, 100.0
 landmarks = [[20.0, 20.0], [20.0, 80.0], [20.0, 50.0], [50.0, 20.0], [50.0, 80.0], [80.0, 80.0], [80.0, 20.0], [80.0, 50.0]]
@@ -15,7 +16,7 @@ class Robot(object):
     def __init__(self):
         self.x = random() * world_sz_x
         self.y = random() * world_sz_y
-        self.th = random() * 2 * np.pi
+        self.th = random() * 2 * math.pi
 
         self.lin_noise = 0.0
         self.ang_noise = 0.0
@@ -26,7 +27,7 @@ class Robot(object):
             raise Exception("X coordinate outside the world")
         if new_y < 0 or new_y >= world_sz_y:
             raise Exception("Y coordinate outside the world")
-        if new_th < 0 or new_th >= 2*np.pi:
+        if new_th < 0 or new_th >= 2*math.pi:
             raise Exception("Invalid: th must be in [0, ..., 2pi]")
 
         self.x = new_x
@@ -43,8 +44,9 @@ class Robot(object):
         meas = 0
 
         for i in range(len(landmarks)):
-            meas = np.sqrt((self.x - landmarks[i][0])**2 + (self.y - landmarks[i][1])**2)
-            meas += np.random.normal(size=1, loc=0.0, scale=self.sense_noise)[0]  # loc and scale are mean and std respectively.
+            meas = math.sqrt((self.x - landmarks[i][0])**2 + (self.y - landmarks[i][1])**2)
+            # meas += np.random.normal(size=1, loc=0.0, scale=self.sense_noise)[0]  # loc and scale are mean and std respectively.
+            meas += gauss(0.0, self.sense_noise) # loc and scale are mean and std respectively.
             meas_array[i] = meas
 
         return meas_array
@@ -54,18 +56,18 @@ class Robot(object):
             raise Exception("Backward movement not allowed")
 
         # Add noise to the move_lin, move_ang
-        move_lin += np.random.normal(size=1, loc=0.0, scale=self.lin_noise)[0]
-        move_ang += np.random.normal(size=1, loc=0.0, scale=self.ang_noise)[0]
+        move_lin += gauss(0.0, self.lin_noise) # np.random.normal(size=1, loc=0.0, scale=self.lin_noise)[0]
+        move_ang += gauss(0.0, self.ang_noise) # np.random.normal(size=1, loc=0.0, scale=self.ang_noise)[0]
 
         # Make the move
-        self.x += move_lin * np.cos(self.th)
-        self.y += move_lin * np.sin(self.th)
+        self.x += move_lin * math.cos(self.th)
+        self.y += move_lin * math.sin(self.th)
         self.th += move_ang
 
         # Cyclic truncate
         self.x = mod(self.x, world_sz_x)
         self.y = mod(self.y, world_sz_y)
-        self.th = mod(self.th, 2*np.pi)
+        self.th = mod(self.th, 2*math.pi)
 
         # Create a new Robot object and set these values
         new_robot = Robot()
@@ -85,7 +87,7 @@ class Robot(object):
         prob = 1.0
         dist = 0.0
         for i in range(len(landmarks)):
-            dist = np.sqrt((self.x - landmarks[i][0]) ** 2 + (self.y - landmarks[i][1]) ** 2)
+            dist = math.sqrt((self.x - landmarks[i][0]) ** 2 + (self.y - landmarks[i][1]) ** 2)
             prob *= gaussian_pdf(dist, self.sense_noise, meas_arr[i])
         return prob
 
@@ -105,7 +107,7 @@ def mod(dividend, divisor):
 
 
 def gaussian_pdf(mean, std, variable):
-    return math.exp(-(((mean - variable)/std)**2)/2.0)/(std*math.sqrt(2*np.pi))
+    return math.exp(-(((mean - variable)/std)**2)/2.0)/(std*math.sqrt(2*math.pi))
 
 
 def visualize(particles2, particles3, fake_rbt):
