@@ -10,6 +10,7 @@ seed(100)
 
 world_sz_x, world_sz_y = 100.0, 100.0
 landmarks = [[20.0, 20.0], [20.0, 80.0], [20.0, 50.0], [50.0, 20.0], [50.0, 80.0], [80.0, 80.0], [80.0, 20.0], [80.0, 50.0]]
+itr_count = 0
 
 
 class Robot(object):
@@ -122,9 +123,9 @@ def visualize(particles2, particles3, fake_rbt):
     # Plot the landmarks
     for i in range(len(landmarks)):
         if i == 0:
-            plt.plot(landmarks[i][0], landmarks[i][1], "mo", label="land-marks")
+            plt.plot(landmarks[i][0], landmarks[i][1], "ko", label="land-marks",  markersize=12)
         else:
-            plt.plot(landmarks[i][0], landmarks[i][1], "mo")
+            plt.plot(landmarks[i][0], landmarks[i][1], "ko", markersize=12)
 
     # Plot all the particles that moved
     for j in range(len(particles2)):
@@ -145,7 +146,10 @@ def visualize(particles2, particles3, fake_rbt):
     # Plot actual robot's location
     plt.plot(fake_rbt.x, fake_rbt.y, "go", label="actual location")
 
-    plt.legend(loc="upper left", ncol=2)
+    # plt.legend(loc="upper left", ncol=2)
+    plt.legend(bbox_to_anchor=(0.0, 1.15), loc="upper left", ncol=2)
+
+    plt.savefig("./progress_image/itr"+str(itr_count)+".png", dpi=150)
 
     plt.pause(2.0)
 
@@ -156,7 +160,9 @@ if __name__ == "__main__":
     plt.figure()
 
     # Select number of iterations
-    itr = 50
+    itr = 100
+    mv_linear = 5.0
+    mv_angular = 0.05
 
     # Create a bunch of particles (Robot object)
     num_particles = 1000
@@ -180,7 +186,7 @@ if __name__ == "__main__":
         print("Iteration: %d"%j)
 
         # Step-1: Move fake_rbt to get new sensed measurements
-        fake_rbt = fake_rbt.move(5.0, 0.1)
+        fake_rbt = fake_rbt.move(mv_linear, mv_angular)
         meas_arr = fake_rbt.sense()
         print("End of step-1")
 
@@ -188,7 +194,7 @@ if __name__ == "__main__":
         particles2 = []
         for i in range(num_particles):
             current_particle = particles[i]
-            current_particle_moved = current_particle.move(5.0, 0.1)
+            current_particle_moved = current_particle.move(mv_linear, mv_angular)
             particles2.append(current_particle_moved)
             particles[i] = current_particle_moved
         print("End of step-2")
@@ -220,6 +226,8 @@ if __name__ == "__main__":
 
         print("end of iteration %d"%j)
         print("---------------------")
+
+        itr_count += 1
 
         # Visualize
         visualize(particles2, particles3, fake_rbt)
