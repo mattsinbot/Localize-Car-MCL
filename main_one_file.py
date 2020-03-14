@@ -185,7 +185,7 @@ if __name__ == "__main__":
     for j in range(itr):
         print("Iteration: %d"%j)
 
-        # Step-1: Move fake_rbt to get new sensed measurements
+        # Step-1: Move fake_rbt and get new sensed measurements
         fake_rbt = fake_rbt.move(mv_linear, mv_angular)
         meas_arr = fake_rbt.sense()
         print("End of step-1")
